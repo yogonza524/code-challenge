@@ -1,9 +1,9 @@
 package com.hiberus.challenge.business;
 
+import com.hiberus.challenge.domain.AttributeType;
 import com.hiberus.challenge.domain.Product;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -32,44 +32,51 @@ public class InMemoryProductService implements ProductService {
   }
 
   @Override
-  public Product findById(String id) {
-    return productDatabase.get(id);
+  public List<Product> findBy(AttributeType type, String attribute) {
+    List<Product> products = null;
+    switch(type) {
+      case ID: products = findById(attribute); break;
+      case NAME: products = findByName(attribute); break;
+      case DESCRIPTION: products = findLikeDescription(attribute); break;
+    }
+    return products;
   }
 
-  @Override
-  public List<Product> findByName(String name) {
-    return productDatabase.values().parallelStream()
-        .filter(
-            product ->
-                Objects.nonNull(product.getName())
-                    && product
-                        .getName()
-                        .toLowerCase(Locale.ROOT)
-                        .contains(name.toLowerCase(Locale.ROOT)))
-        .collect(Collectors.toList());
+  private List<Product> findById(String attribute) {
+    return Optional.ofNullable(productDatabase.get(attribute)).map(Arrays::asList).orElse(null);
   }
 
-  @Override
-  public List<Product> findLikeDescription(String description) {
-    return productDatabase.values().parallelStream()
-        .filter(
-            product ->
-                Objects.nonNull(product.getDescription())
-                    && product
-                        .getDescription()
-                        .toLowerCase(Locale.ROOT)
-                        .contains(description.toLowerCase(Locale.ROOT)))
-        .collect(Collectors.toList());
+  private List<Product> findByName(String name) {
+    return Optional.ofNullable(
+            productDatabase.values().parallelStream()
+                    .filter(
+                            product ->
+                                    Objects.nonNull(product.getName())
+                                            && product
+                                            .getName()
+                                            .toLowerCase(Locale.ROOT)
+                                            .contains(name.toLowerCase(Locale.ROOT)))
+                    .collect(Collectors.toList())
+    ).orElse(null);
+  }
+
+  private List<Product> findLikeDescription(String description) {
+    return Optional.ofNullable(
+            productDatabase.values().parallelStream()
+                    .filter(
+                            product ->
+                                    Objects.nonNull(product.getDescription())
+                                            && product
+                                            .getDescription()
+                                            .toLowerCase(Locale.ROOT)
+                                            .contains(description.toLowerCase(Locale.ROOT)))
+                    .collect(Collectors.toList())
+    ).orElse(null);
   }
 
   @Override
   public Product remove(String id) {
     return productDatabase.remove(id);
-  }
-
-  @Override
-  public Boolean remove(Product product) {
-    return productDatabase.remove(product.getId(), product);
   }
 
   @Override

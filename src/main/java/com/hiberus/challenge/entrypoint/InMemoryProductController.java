@@ -1,7 +1,10 @@
 package com.hiberus.challenge.entrypoint;
 
 import com.hiberus.challenge.business.ProductService;
+import com.hiberus.challenge.domain.AttributeType;
 import com.hiberus.challenge.domain.Product;
+
+import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +25,14 @@ public class InMemoryProductController {
 
   private final ProductService inMemoryProductService;
 
-  @GetMapping(value = "/find/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  ResponseEntity<Product> findById(@PathVariable(value = "id") String id) {
-    return Optional.ofNullable(inMemoryProductService.findById(id))
+  @GetMapping(value = "/find/{attribute}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<List<Product>> findById(@PathVariable(value = "attribute") String attribute
+  , AttributeType type) {
+    return Optional.ofNullable(inMemoryProductService.findBy(type, attribute))
         .map(ResponseEntity::ok)
         .orElseGet(
             () -> {
-              log.error(String.format("action=findById, message=ID %s not found", id));
+              log.error(String.format("action=findById, message=ID %s not found", attribute));
               return ResponseEntity.notFound().build();
             });
   }

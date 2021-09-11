@@ -1,8 +1,7 @@
 package com.hiberus.challenge.entrypoint;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.hiberus.challenge.business.ProductService;
+import com.hiberus.challenge.domain.AttributeType;
 import com.hiberus.challenge.domain.Product;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Arrays;
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class InMemoryProductControllerTest {
 
@@ -21,33 +23,35 @@ class InMemoryProductControllerTest {
   @InjectMocks private InMemoryProductController inMemoryProductController;
 
   private final String ID = "PR-00001";
+  private final Product product = Product.builder().id(ID).name("Hiberus CPU").description("Just a CPU").build();
 
   @Test
   public void shouldPassWhenProductExists() {
 
-    Mockito.when(productService.findById(Mockito.anyString()))
+    Mockito.when(productService.findBy(Mockito.any(), Mockito.anyString()))
         .thenReturn(
-            Product.builder()
-                .id(ID)
-                .description("Hiberus Mouse")
-                .name("Mouse Hiberus XZ3")
-                .build());
+                Arrays.asList(Product.builder()
+                        .id(ID)
+                        .description("Hiberus Mouse")
+                        .name("Mouse Hiberus XZ3")
+                        .build()));
 
-    ResponseEntity<Product> found = inMemoryProductController.findById(ID);
+    ResponseEntity<List<Product>> found = inMemoryProductController.findById(ID, AttributeType.ID);
 
     Assertions.assertNotNull(found);
+    Product product = found.getBody().get(0);
     Assertions.assertEquals(HttpStatus.OK, found.getStatusCode());
-    Assertions.assertEquals(ID, found.getBody().getId());
-    Assertions.assertEquals("Hiberus Mouse", found.getBody().getDescription());
-    Assertions.assertEquals("Mouse Hiberus XZ3", found.getBody().getName());
+    Assertions.assertEquals(ID, product.getId());
+    Assertions.assertEquals("Hiberus Mouse", product.getDescription());
+    Assertions.assertEquals("Mouse Hiberus XZ3", product.getName());
   }
 
   @Test
   public void shouldPassWhenProductIdNotFound() {
 
-    Mockito.when(productService.findById(Mockito.anyString())).thenReturn(null);
+    Mockito.when(productService.findBy(Mockito.any(), Mockito.anyString())).thenReturn(null);
 
-    ResponseEntity<Product> notFound = inMemoryProductController.findById(ID);
+    ResponseEntity<List<Product>> notFound = inMemoryProductController.findById(ID, AttributeType.DESCRIPTION);
 
     Assertions.assertNotNull(notFound);
     Assertions.assertEquals(HttpStatus.NOT_FOUND, notFound.getStatusCode());
@@ -56,14 +60,60 @@ class InMemoryProductControllerTest {
   @Test
   public void shouldPassWhenProductIsCreated() {
 
-    Product newProduct = Product.builder().id(ID).name("Hiberus CPU").description("Just a CPU").build();
-
     Mockito.when(productService.addProduct(
-            Mockito.any())).thenReturn(newProduct);
+            Mockito.any())).thenReturn(product);
 
-    ResponseEntity<Product> created = inMemoryProductController.createProduct(newProduct);
+    ResponseEntity<Product> created = inMemoryProductController.createProduct(product);
 
     Assertions.assertNotNull(created);
     Assertions.assertEquals(HttpStatus.CREATED, created.getStatusCode());
+  }
+
+  @Test
+  public void shouldPassWhenDeleteIsSuccess() {
+
+    Mockito.when(productService.remove(Mockito.anyString()))
+            .thenReturn(product);
+
+    ResponseEntity deleted = inMemoryProductController.deleteProduct(ID);
+
+    Assertions.assertNotNull(deleted);
+    Assertions.assertEquals(HttpStatus.OK, deleted.getStatusCode());
+  }
+
+  @Test
+  public void shouldPassWhenDeleteIsNotFound() {
+
+    Mockito.when(productService.remove(Mockito.anyString()))
+            .thenReturn(null);
+
+    ResponseEntity deleted = inMemoryProductController.deleteProduct(ID);
+
+    Assertions.assertNotNull(deleted);
+    Assertions.assertEquals(HttpStatus.NOT_FOUND, deleted.getStatusCode());
+  }
+
+  @Test
+  public void shouldPassWhenUpdateIsSuccess() {
+
+    Mockito.when(productService.update(Mockito.any()))
+            .thenReturn(product);
+
+    ResponseEntity updated = inMemoryProductController.updateProduct(product);
+
+    Assertions.assertNotNull(updated);
+    Assertions.assertEquals(HttpStatus.OK, updated.getStatusCode());
+  }
+
+  @Test
+  public void shouldPassWhenUpdateFailWithNotFound() {
+
+    Mockito.when(productService.update(Mockito.any()))
+            .thenReturn(null);
+
+    ResponseEntity updated = inMemoryProductController.updateProduct(product);
+
+    Assertions.assertNotNull(updated);
+    Assertions.assertEquals(HttpStatus.NOT_FOUND, updated.getStatusCode());
   }
 }

@@ -1,5 +1,6 @@
 package com.hiberus.challenge.business;
 
+import com.hiberus.challenge.domain.AttributeType;
 import com.hiberus.challenge.domain.Product;
 import java.util.List;
 
@@ -7,15 +8,10 @@ public interface ProductService {
 
   Product addProduct(Product product);
 
-  Product findById(String id);
-
-  List<Product> findByName(String name);
-
-  List<Product> findLikeDescription(String description);
+  List<Product> findBy(AttributeType type, String attribute);
 
   Product remove(String id);
 
-  Boolean remove(Product product);
 
   List<Product> findAll();
 
