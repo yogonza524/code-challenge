@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+swagger:
+  title: CRUD Product Service
+  description: Hiberus Challenge API Rest
+  version: 1.0.0
+  termsOfService: Gonzalo H. Mendoza terms
+  contact:
+    name: Gonzalo H. Mendoza
+    email: yogonza524@gmail.com

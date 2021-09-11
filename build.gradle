@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+    id 'info.solidsoft.pitest' version '1.5.2'
+    id 'com.github.sherter.google-java-format' version '0.9'
+    id 'org.springframework.boot' version '2.5.4'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+    set('springCloudVersion', "2020.0.3")
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.google.guava:guava:29.0-jre'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+
+    // Cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    // Springfox (Swagger)
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+}
+
+application {
+    mainClassName = 'com.hiberus.challenge.App'
+}
+
+apply from: 'gradle/test.gradle'

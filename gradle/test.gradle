@@ -1,0 +1,51 @@
+test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "passed", "failed", "skipped"
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+pitest {
+    pitestVersion = "1.4.5"
+    //pitestVersion = "1.5.2"
+    testPlugin = "junit5"
+    junit5PluginVersion = '0.12'
+    targetClasses = ['com.hiberus.challenge.*']
+    excludedClasses = [
+            'com.hiberus.challenge.App',
+            'com.hiberus.challenge.domain.*',
+            'com.hiberus.challenge.config.*'
+    ]
+    threads = 8
+    outputFormats = ['XML', 'HTML']
+    mutationThreshold = 90
+    coverageThreshold = 0
+    reportDir = file('build/reports/mutation-tests-results')
+    timestampedReports = false
+    mutators = ['CONDITIONALS_BOUNDARY',
+                'INCREMENTS',
+                'INVERT_NEGS',
+                'MATH',
+                'NEGATE_CONDITIONALS',
+                'RETURN_VALS',
+                'VOID_METHOD_CALLS',
+                'INLINE_CONSTS',
+                'REMOVE_CONDITIONALS',
+                'EMPTY_RETURNS',
+                'FALSE_RETURNS',
+                'TRUE_RETURNS',
+                'NULL_RETURNS',
+                'PRIMITIVE_RETURNS']
+}
